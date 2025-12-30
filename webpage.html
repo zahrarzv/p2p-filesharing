@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Peer & File Dashboard</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 2em; }
+    th, td { border: 1px solid #ccc; padding: 0.5em; }
+    th { background: #dfd3d3; }
+    button { padding: 0.5em 1em; margin-bottom: 1em; }
+  </style>
+</head>
+<body>
+  <h1>Peer Stats</h1>
+
+  <h2>Tracked Peers</h2>
+  <button id="refresh">Refresh</button>
+  <div id = "peersContainer" style = "display:block;">
+  <table id="peersTable">
+    <thead>
+      <tr>
+        <th>Peer ID</th>
+        <th>Host</th>
+        <th>Port</th>
+        <th>Last Seen</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Files</h2>
+  <div id = "updateTable" style = "display:block;">
+  <table id="filesTable">
+    <thead>
+      <tr>
+        <th>File ID</th>
+        <th>Name</th>
+        <th>Owner</th>
+        <th>Size (bytes)</th>
+        <th>Timestamp</th>
+        <th>Peers with File</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+
+
+    document.getElementById("refresh").addEventListener("click", function (event) {
+        event.preventDefault();
+        refresh();
+
+    })
+  
+
+
+    function refresh() {
+    let xhr2 = new XMLHttpRequest(); 
+    xhr2.open("GET","/api/refresh", true);
+    xhr2.onreadystatechange = function() {
+        if (xhr2.readyState === 4) {
+            if (xhr2.status === 200) {  
+                alert("success")
+                let response = JSON.parse(xhr2.responseText);
+                updatePeerTable(response.peers)
+                updateFileTable(response.files)
+                
+                //updatePeerTable()
+            } else {
+                alert("Unable to list files successfully");
+            }
+        }
+    };
+
+  xhr2.send()
+}
+
+function updatePeerTable(peers){
+
+    let table = document.getElementById("peersTable");
+    let tbody = table.querySelector("tbody"); 
+    if(!tbody){
+        tbody = document.createElement("tbody");
+        table.appendChild(tbody);
+
+        // "peer_id":  peer["peer_id"],
+        //          "host":     peer["phost"],
+        //          "port":     peer["port"],
+        //          "last_seen": peer["time"]
+        //      })
+    }
+    tbody.innerHTML ="";
+    peers.forEach(peer => {
+        let row = document.createElement("tr");
+        
+        let peerID = document.createElement("td");
+        peerID.textContent = peer.peer_id;
+        row.appendChild(peerID);
+        
+        let peerHost = document.createElement("td");
+        peerHost.textContent = peer.host;
+        row.appendChild(peerHost);
+        
+        let peerPort = document.createElement("td");
+        peerPort.textContent = peer.port;
+        row.appendChild(peerPort);
+        
+        let lastSeen = document.createElement("td");
+        lastSeen.textContent = peer.last_seen;
+        row.appendChild(lastSeen);
+        
+        tbody.appendChild(row);
+    });
+
+}
+
+
+function updateFileTable(files){
+
+let table = document.getElementById("filesTable");
+let tbody = table.querySelector("tbody"); 
+if(!tbody){
+    tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+
+    // fMetaData_list.append({
+    //              "fileId":  fmetaData["fileId"],
+    //              "filename":     fmetaData["filename"],
+    //              "Owner":     fmetaData["Owner"],
+    //              "filesize":fmetaData["filesize"],
+    //              "fileTime": fmetaData["fileTime"]
+    //              "peersWithfiles": fmetaData["peersWithfiles"]
+    //          })
+}
+tbody.innerHTML ="";
+files.forEach(file => {
+    let row = document.createElement("tr");
+    
+    let fileId = document.createElement("td");
+    fileId.textContent = file.fileId;
+    row.appendChild(fileId);
+    
+    let filename = document.createElement("td");
+    filename.textContent = file.filename;
+    row.appendChild(filename);
+    
+    let Owner = document.createElement("td");
+    Owner.textContent = file.Owner;
+    row.appendChild(Owner);
+    
+    let filesize = document.createElement("td");
+    filesize.textContent = file.filesize;
+    row.appendChild(filesize);
+
+    let fileTime = document.createElement("td");
+    fileTime.textContent = file.fileTime;
+    row.appendChild(fileTime);
+    
+    let peersWithfiles = document.createElement("td");
+    peersWithfiles.textContent = file.peersWithfiles;
+    row.appendChild(peersWithfiles);
+    
+    tbody.appendChild(row);
+});
+
+}
+
+</script>
+
